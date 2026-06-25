@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
@@ -10,9 +10,10 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
+  DropdownMenuSeparator,
 } from "@/components/ui/dropdown-menu";
 import { cn } from "@/lib/utils";
-import { LayoutDashboard, Settings, Wallet, LogOut, User, Menu, X } from "lucide-react";
+import { LayoutDashboard, Settings, Wallet, LogOut, User, Menu, X, ChevronDown } from "lucide-react";
 
 const navItems = [
   { href: "/", label: "Dashboard", icon: LayoutDashboard },
@@ -21,6 +22,16 @@ const navItems = [
 
 export function UserMenu() {
   const router = useRouter();
+  const [email, setEmail] = useState<string | null>(null);
+
+  useEffect(() => {
+    const supabase = createClient();
+    supabase.auth.getUser().then(({ data: { user } }) => {
+      if (user) {
+        setEmail(user.email ?? null);
+      }
+    });
+  }, []);
 
   async function handleLogout() {
     const supabase = createClient();
@@ -28,17 +39,50 @@ export function UserMenu() {
     router.push("/login");
   }
 
+  const initial = email ? email.charAt(0).toUpperCase() : "";
+  const displayName = email ? email.split("@")[0] : "";
+
   return (
     <DropdownMenu>
       <DropdownMenuTrigger
         render={
-          <Button variant="ghost" size="icon" className="rounded-full">
-            <User className="h-5 w-5" />
+          <Button
+            variant="ghost"
+            className="flex items-center gap-2 rounded-full px-2 py-1.5 hover:bg-muted focus-visible:ring-1 focus-visible:ring-ring transition-all duration-200"
+          >
+            <div className="flex h-7 w-7 items-center justify-center rounded-full bg-primary/10 text-xs font-semibold text-primary shadow-inner border border-primary/20">
+              {initial ? initial : <User className="h-4 w-4" />}
+            </div>
+            {email && (
+              <div className="hidden sm:flex items-center gap-1">
+                <span className="text-sm font-medium text-foreground max-w-[100px] truncate">
+                  {displayName}
+                </span>
+                <ChevronDown className="h-3 w-3 text-muted-foreground" />
+              </div>
+            )}
           </Button>
         }
       />
-      <DropdownMenuContent align="end">
-        <DropdownMenuItem onClick={handleLogout}>
+      <DropdownMenuContent align="end" className="w-56 p-1.5">
+        {email && (
+          <>
+            <div className="flex flex-col space-y-0.5 px-2 py-1.5">
+              <span className="text-[10px] font-semibold tracking-wider text-muted-foreground uppercase">
+                ลงชื่อเข้าใช้ด้วย
+              </span>
+              <span className="truncate text-sm font-medium text-foreground">
+                {email}
+              </span>
+            </div>
+            <DropdownMenuSeparator className="my-1" />
+          </>
+        )}
+        <DropdownMenuItem
+          onClick={handleLogout}
+          variant="destructive"
+          className="cursor-pointer focus:bg-destructive/10 focus:text-destructive dark:focus:bg-destructive/20 rounded-md transition-colors"
+        >
           <LogOut className="mr-2 h-4 w-4" />
           ออกจากระบบ
         </DropdownMenuItem>
