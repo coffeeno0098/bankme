@@ -130,6 +130,8 @@ export function DashboardClient({
             onCategoryChange={handleCategoryChange}
             searchQuery={searchQuery}
             onSearchQueryChange={setSearchQuery}
+            selectedMonth={selectedMonth}
+            onMonthChange={handleMonthChange}
           />
 
           {/* Transaction Table */}

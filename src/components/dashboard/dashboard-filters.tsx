@@ -10,6 +10,7 @@ import {
 } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
 import { Search } from "lucide-react";
+import { formatMonthLabel, parseMonthLabel } from "@/lib/month";
 import type { Category } from "@/lib/database.types";
 
 interface DashboardFiltersProps {
@@ -20,7 +21,14 @@ interface DashboardFiltersProps {
   onCategoryChange: (categoryId: string | null) => void;
   searchQuery: string;
   onSearchQueryChange: (query: string) => void;
+  selectedMonth: Date;
+  onMonthChange: (month: Date) => void;
 }
+
+const monthNames = [
+  "มกราคม", "กุมภาพันธ์", "มีนาคม", "เมษายน", "พฤษภาคม", "มิถุนายน",
+  "กรกฎาคม", "สิงหาคม", "กันยายน", "ตุลาคม", "พฤศจิกายน", "ธันวาคม",
+];
 
 export function DashboardFilters({
   typeFilter,
@@ -30,7 +38,20 @@ export function DashboardFilters({
   onCategoryChange,
   searchQuery,
   onSearchQueryChange,
+  selectedMonth,
+  onMonthChange,
 }: DashboardFiltersProps) {
+  // Generate options from 3 months ahead to 12 months back
+  const getMonthOptions = () => {
+    const options = [];
+    const today = new Date();
+    for (let i = -3; i <= 12; i++) {
+      const d = new Date(today.getFullYear(), today.getMonth() - i, 1);
+      options.push(d);
+    }
+    return options;
+  };
+
   return (
     <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between w-full">
       <div className="flex flex-wrap items-center gap-2">
@@ -56,6 +77,30 @@ export function DashboardFilters({
           รายจ่าย
         </Button>
 
+        {/* Month Selector Dropdown */}
+        <Select
+          value={formatMonthLabel(selectedMonth)}
+          onValueChange={(val) => {
+            if (val) onMonthChange(parseMonthLabel(val));
+          }}
+        >
+          <SelectTrigger className="w-[180px]">
+            <SelectValue placeholder="เลือกเดือน" />
+          </SelectTrigger>
+          <SelectContent>
+            {getMonthOptions().map((m) => {
+              const value = formatMonthLabel(m);
+              const label = `${monthNames[m.getMonth()]} ${m.getFullYear() + 543}`;
+              return (
+                <SelectItem key={value} value={value}>
+                  {label}
+                </SelectItem>
+              );
+            })}
+          </SelectContent>
+        </Select>
+
+        {/* Category Selector Dropdown */}
         <Select value={categoryFilter} onValueChange={onCategoryChange}>
           <SelectTrigger className="w-[180px]">
             <SelectValue placeholder="ทุกหมวดหมู่" />

@@ -112,7 +112,7 @@ interface GroupedTransactions {
 
 export function TransactionTable({ transactions }: TransactionTableProps) {
   const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 10;
+  const itemsPerPage = 5;
 
   // Reset page when transactions array changes (e.g., search/filter)
   useEffect(() => {
