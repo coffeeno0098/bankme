@@ -25,22 +25,23 @@ export default async function proxy(request: NextRequest) {
     }
   );
 
+  // IMPORTANT: use getSession() (not getUser()) — it auto-refreshes the session cookie
   const {
-    data: { user },
-  } = await supabase.auth.getUser();
+    data: { session },
+  } = await supabase.auth.getSession();
 
   const path = request.nextUrl.pathname;
 
   // Public routes
   if (path === "/login" || path.startsWith("/auth")) {
-    if (user) {
+    if (session) {
       return NextResponse.redirect(new URL("/", request.url));
     }
     return supabaseResponse;
   }
 
   // Protected routes
-  if (!user) {
+  if (!session) {
     return NextResponse.redirect(new URL("/login", request.url));
   }
 
