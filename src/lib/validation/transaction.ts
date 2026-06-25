@@ -6,7 +6,7 @@ export const transactionSchema = z
   .object({
     type: transactionTypeEnum,
     amount: z.number().positive("จำนวนต้องมากกว่า 0"),
-    transaction_at: z.string().datetime().or(z.date()),
+    transaction_at: z.string().refine((val) => !isNaN(Date.parse(val)), "วันที่และเวลาไม่ถูกต้อง").or(z.date()),
     description: z.string().optional().or(z.literal("")),
     category_id: z.string().uuid().nullable(),
   })
