@@ -32,13 +32,17 @@ export default async function DashboardPage({
 
   let query = supabase
     .from("transactions")
-    .select("*, categories!inner(id, name)")
+    .select("*, categories(id, name)")
     .gte("transaction_at", start.toISOString())
     .lt("transaction_at", end.toISOString())
     .order("transaction_at", { ascending: false });
 
   if (typeFilter !== "all") {
     query = query.eq("type", typeFilter);
+  }
+
+  if (categoryFilter !== "all") {
+    query = query.eq("category_id", categoryFilter);
   }
 
   const { data: transactions } = await query;

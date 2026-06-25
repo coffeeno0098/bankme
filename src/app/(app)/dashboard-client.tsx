@@ -45,6 +45,15 @@ export function DashboardClient({
 }: DashboardClientProps) {
   const router = useRouter();
   const [dialogOpen, setDialogOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
+
+  const filteredTransactions = transactions.filter((tx) => {
+    if (!searchQuery) return true;
+    const query = searchQuery.toLowerCase();
+    const descMatch = tx.description?.toLowerCase().includes(query) ?? false;
+    const catMatch = tx.category_name?.toLowerCase().includes(query) ?? false;
+    return descMatch || catMatch;
+  });
 
   const updateSearchParams = useCallback(
     (updates: Record<string, string | null>) => {
@@ -119,12 +128,14 @@ export function DashboardClient({
             categories={categories}
             onTypeChange={handleTypeChange}
             onCategoryChange={handleCategoryChange}
+            searchQuery={searchQuery}
+            onSearchQueryChange={setSearchQuery}
           />
 
           {/* Transaction Table */}
           <div>
             <h2 className="mb-3 text-lg font-semibold">รายการ</h2>
-            <TransactionTable transactions={transactions} />
+            <TransactionTable transactions={filteredTransactions} />
           </div>
         </>
       )}
