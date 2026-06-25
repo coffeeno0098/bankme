@@ -97,7 +97,6 @@ bankme/
 ├── src/
 │   ├── app/                         # Next.js App Router
 │   │   ├── layout.tsx               # Root layout (Geist font, Thai lang)
-│   │   ├── page.tsx                 # Redirect: / → /login
 │   │   ├── globals.css              # Tailwind + shadcn theme
 │   │   ├── login/
 │   │   │   └── page.tsx             # Login/SignUp tabs (client component)
@@ -124,14 +123,14 @@ bankme/
 │   │   │   ├── expense-pie-chart.tsx # Pie chart (Recharts)
 │   │   │   ├── income-expense-bar-chart.tsx # Trend bar chart
 │   │   │   ├── month-picker.tsx     # Month selector
-│   │   │   ├── dashboard-filters.tsx # Type + Category filters
+│   │   │   ├── dashboard-filters.tsx # Type, Category, Month filters & Search
 │   │   │   └── empty-dashboard-state.tsx # Empty state onboarding
 │   │   ├── transactions/
-│   │   │   ├── transaction-table.tsx # Data table
+│   │   │   ├── transaction-table.tsx # Date-grouped list with pagination
 │   │   │   └── transaction-dialog.tsx # Add/Edit dialog
 │   │   ├── settings/
 │   │   │   └── category-table.tsx   # Category CRUD table
-│   │   ├── app-shell.tsx            # App layout shell (sidebar/header)
+│   │   ├── app-shell.tsx            # App layout shell (sidebar/header + UserMenu)
 │   │   └── ui/                      # shadcn/ui components
 │   │       ├── {button,card,input,label,select,table}.tsx
 │   │       ├── {dialog,popover,dropdown-menu,tabs,separator}.tsx
