@@ -78,7 +78,10 @@ export function DashboardClient({
     if (!deletingTransaction) return;
     setDeleteSubmitting(true);
     try {
-      await deleteTransaction(deletingTransaction.id);
+      const res = await deleteTransaction(deletingTransaction.id);
+      if (!res.success) {
+        throw new Error(res.error);
+      }
       toast.success("ลบรายการสำเร็จ!");
       setDeletingTransaction(null);
       router.refresh();

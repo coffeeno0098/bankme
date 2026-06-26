@@ -36,7 +36,10 @@ export function CategoryTable({ categories }: CategoryTableProps) {
 
   async function onAdd(data: CategoryInput) {
     try {
-      await createCategory(data.name);
+      const res = await createCategory(data.name);
+      if (!res.success) {
+        throw new Error(res.error);
+      }
       toast.success("เพิ่มหมวดหมู่สำเร็จ");
       reset();
       setAdding(false);
@@ -49,7 +52,10 @@ export function CategoryTable({ categories }: CategoryTableProps) {
   async function handleRename(id: string) {
     if (!editValue.trim()) return;
     try {
-      await renameCategory(id, editValue);
+      const res = await renameCategory(id, editValue);
+      if (!res.success) {
+        throw new Error(res.error);
+      }
       toast.success("เปลี่ยนชื่อหมวดหมู่สำเร็จ");
       setEditingId(null);
       router.refresh();
@@ -61,7 +67,10 @@ export function CategoryTable({ categories }: CategoryTableProps) {
   async function handleDelete(id: string, name: string) {
     if (!confirm(`ต้องการลบหมวดหมู่ "${name}" ใช่หรือไม่?`)) return;
     try {
-      await softDeleteCategory(id);
+      const res = await softDeleteCategory(id);
+      if (!res.success) {
+        throw new Error(res.error);
+      }
       toast.success("ลบหมวดหมู่สำเร็จ");
       router.refresh();
     } catch (error) {

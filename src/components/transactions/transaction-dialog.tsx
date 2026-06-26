@@ -158,7 +158,7 @@ export function TransactionDialog({
       }
 
       if (isEdit && transaction) {
-        await updateTransaction({
+        const res = await updateTransaction({
           id: transaction.id,
           type: data.type,
           amount: data.amount,
@@ -169,9 +169,12 @@ export function TransactionDialog({
           exchange_rate: data.exchange_rate,
           attachment_path: attachmentPath,
         });
+        if (!res.success) {
+          throw new Error(res.error);
+        }
         toast.success("แก้ไขรายการสำเร็จ!");
       } else {
-        await createTransaction({
+        const res = await createTransaction({
           type: data.type,
           amount: data.amount,
           description: data.description || null,
@@ -181,6 +184,9 @@ export function TransactionDialog({
           exchange_rate: data.exchange_rate,
           attachment_path: attachmentPath,
         });
+        if (!res.success) {
+          throw new Error(res.error);
+        }
         toast.success(
           data.type === "income" ? "เพิ่มรายรับสำเร็จ!" : "เพิ่มรายจ่ายสำเร็จ!"
         );
