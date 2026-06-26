@@ -9,6 +9,9 @@ export const transactionSchema = z
     transaction_at: z.string().refine((val) => !isNaN(Date.parse(val)), "วันที่และเวลาไม่ถูกต้อง").or(z.date()),
     description: z.string().optional().or(z.literal("")),
     category_id: z.string().uuid().nullable(),
+    currency: z.string().default("THB"),
+    exchange_rate: z.number().default(1.0),
+    attachment_path: z.string().nullable().optional(),
   })
   .refine(
     (data) => {

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { formatTHB } from "@/lib/format";
@@ -18,8 +18,19 @@ import {
   ChevronsLeft,
   ChevronsRight,
   DollarSign,
+  MoreVertical,
+  Edit2,
+  Trash2,
+  FileImage,
   type LucideIcon,
 } from "lucide-react";
+import {
+  DropdownMenu,
+  DropdownMenuTrigger,
+  DropdownMenuContent,
+  DropdownMenuItem,
+} from "@/components/ui/dropdown-menu";
+import { createClient } from "@/lib/supabase/client";
 
 interface TransactionRow {
   id: string;
@@ -28,10 +39,16 @@ interface TransactionRow {
   description: string | null;
   transaction_at: string;
   category_name: string | null;
+  category_id: string | null;
+  currency: string;
+  exchange_rate: number;
+  attachment_path: string | null;
 }
 
 interface TransactionTableProps {
   transactions: TransactionRow[];
+  onEdit: (transaction: TransactionRow) => void;
+  onDelete: (transaction: TransactionRow) => void;
 }
 
 interface CategoryStyle {
@@ -110,14 +127,15 @@ interface GroupedTransactions {
   netTotal: number;
 }
 
-export function TransactionTable({ transactions }: TransactionTableProps) {
+export function TransactionTable({ transactions, onEdit, onDelete }: TransactionTableProps) {
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 5;
 
-  // Reset page when transactions array changes (e.g., search/filter)
-  useEffect(() => {
+  const [prevLength, setPrevLength] = useState(transactions.length);
+  if (transactions.length !== prevLength) {
+    setPrevLength(transactions.length);
     setCurrentPage(1);
-  }, [transactions.length]);
+  }
 
   const totalPages = Math.ceil(transactions.length / itemsPerPage);
   const startIndex = (currentPage - 1) * itemsPerPage;
@@ -167,19 +185,21 @@ export function TransactionTable({ transactions }: TransactionTableProps) {
   return (
     <div className="space-y-6">
       {transactions.length === 0 ? (
-        <div className="flex flex-col items-center justify-center py-16 text-center border rounded-xl bg-muted/10 border-dashed">
-          <p className="text-muted-foreground font-medium">ไม่พบรายการที่ค้นหา</p>
+        <div className="flex flex-col items-center justify-center py-16 text-center bg-card rounded-xl">
+          <p className="text-muted-foreground text-sm font-medium">ไม่พบรายการที่ค้นหา</p>
         </div>
       ) : (
-        <div className="space-y-5">
+        <div className="space-y-6">
           {groups.map((group) => (
             <div key={group.dateStr} className="space-y-2">
-              {/* Group Header */}
-              <div className="flex items-center justify-between px-1 text-xs font-semibold text-muted-foreground uppercase tracking-wider">
-                <span>{group.formattedDate}</span>
+              {/* Group Header — Cal.com caption style */}
+              <div className="flex items-center justify-between px-1">
+                <span className="text-[13px] font-medium text-muted-foreground uppercase tracking-wider">
+                  {group.formattedDate}
+                </span>
                 <span
                   className={cn(
-                    "font-bold",
+                    "font-number text-sm",
                     group.netTotal > 0
                       ? "text-emerald-600 dark:text-emerald-400"
                       : group.netTotal < 0
@@ -192,54 +212,96 @@ export function TransactionTable({ transactions }: TransactionTableProps) {
                 </span>
               </div>
 
-              {/* Group Items */}
-              <div className="divide-y rounded-xl border bg-card shadow-xs overflow-hidden">
+              {/* Group Items — Cal.com card container */}
+              <div className="divide-y divide-border/50 rounded-xl border border-border/60 bg-card overflow-hidden shadow-card">
                 {group.transactions.map((tx) => {
                   const style = getTransactionStyle(tx.type, tx.category_name);
                   const Icon = style.icon;
                   return (
                     <div
                       key={tx.id}
-                      className="flex items-center justify-between p-3.5 hover:bg-muted/30 transition-colors duration-150 group"
+                      className="flex items-center justify-between p-4 hover:bg-muted/30 transition-colors duration-150 group"
                     >
                       <div className="flex items-center gap-3.5 min-w-0">
-                        {/* Icon Badge */}
+                        {/* Icon Badge — rounded-xl (16px) */}
                         <div
                           className={cn(
-                            "flex h-9 w-9 shrink-0 items-center justify-center rounded-xl transition-transform duration-200 group-hover:scale-105",
+                            "flex h-10 w-10 shrink-0 items-center justify-center rounded-xl transition-transform duration-200 group-hover:scale-105",
                             style.bgColor
                           )}
                         >
-                          <Icon className={cn("h-4 w-4", style.iconColor)} />
+                          <Icon className={cn("h-[18px] w-[18px]", style.iconColor)} />
                         </div>
 
                         {/* Description & Category */}
                         <div className="min-w-0">
-                          <p className="truncate text-sm font-semibold text-foreground">
-                            {tx.description || (tx.type === "income" ? "รายรับ" : "รายจ่าย")}
-                          </p>
+                          <div className="flex items-center gap-1.5">
+                            <p className="truncate text-sm font-semibold text-foreground">
+                              {tx.description || (tx.type === "income" ? "รายรับ" : "รายจ่าย")}
+                            </p>
+                            {tx.attachment_path && (
+                              <a
+                                href={createClient().storage.from("receipts").getPublicUrl(tx.attachment_path).data.publicUrl}
+                                target="_blank"
+                                rel="noreferrer"
+                                title="ดูใบเสร็จ"
+                                className="text-muted-foreground hover:text-primary transition-colors cursor-pointer shrink-0 animate-pulse"
+                                onClick={(e) => e.stopPropagation()}
+                              >
+                                <FileImage className="h-3.5 w-3.5" />
+                              </a>
+                            )}
+                          </div>
                           <p className="text-xs text-muted-foreground mt-0.5">
                             {tx.type === "expense" ? tx.category_name ?? "ไม่มีหมวดหมู่" : "รายรับ"}
                           </p>
                         </div>
                       </div>
 
-                      {/* Time & Amount */}
-                      <div className="flex items-center gap-4 text-right">
-                        <div className="hidden sm:block text-[10px] text-muted-foreground">
-                          {format(new Date(tx.transaction_at), "HH:mm")}
+                      {/* Time, Amount & Actions */}
+                      <div className="flex items-center gap-2 sm:gap-4 shrink-0">
+                        <div className="flex items-center gap-3 text-right">
+                          <div className="hidden sm:block text-[11px] text-muted-foreground font-medium">
+                            {format(new Date(tx.transaction_at), "HH:mm")}
+                          </div>
+                          <div
+                            className={cn(
+                              "font-number text-sm flex flex-col items-end",
+                              tx.type === "income"
+                                ? "text-emerald-600 dark:text-emerald-400"
+                                : "text-red-600 dark:text-red-400"
+                            )}
+                          >
+                            <span>
+                              {tx.type === "expense" ? "-" : "+"}
+                              {tx.currency === "THB" ? formatTHB(tx.amount) : `${tx.currency} ${tx.amount.toFixed(2)}`}
+                            </span>
+                            {tx.currency !== "THB" && (
+                              <span className="text-[10px] text-muted-foreground font-normal mt-0.5">
+                                ≈ {formatTHB(tx.amount * tx.exchange_rate)}
+                              </span>
+                            )}
+                          </div>
                         </div>
-                        <div
-                          className={cn(
-                            "text-sm font-bold tracking-tight",
-                            tx.type === "income"
-                              ? "text-emerald-600 dark:text-emerald-400"
-                              : "text-red-600 dark:text-red-400"
-                          )}
-                        >
-                          {tx.type === "expense" ? "-" : "+"}
-                          {formatTHB(tx.amount)}
-                        </div>
+
+                        {/* Action Menu */}
+                        <DropdownMenu>
+                           <DropdownMenuTrigger
+                             className="h-8 w-8 inline-flex items-center justify-center text-muted-foreground opacity-0 group-hover:opacity-100 focus-visible:opacity-100 transition-opacity rounded-lg hover:bg-muted cursor-pointer"
+                           >
+                             <MoreVertical className="h-4 w-4" />
+                           </DropdownMenuTrigger>
+                          <DropdownMenuContent align="end" className="rounded-xl">
+                            <DropdownMenuItem onClick={() => onEdit(tx)}>
+                              <Edit2 className="mr-2 h-3.5 w-3.5 text-muted-foreground" />
+                              <span>แก้ไข</span>
+                            </DropdownMenuItem>
+                            <DropdownMenuItem variant="destructive" onClick={() => onDelete(tx)}>
+                              <Trash2 className="mr-2 h-3.5 w-3.5" />
+                              <span>ลบ</span>
+                            </DropdownMenuItem>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
                       </div>
                     </div>
                   );
@@ -250,31 +312,27 @@ export function TransactionTable({ transactions }: TransactionTableProps) {
 
           {/* Pagination Controls */}
           {totalPages > 1 && (
-            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 pt-4 border-t border-muted">
-              <span className="text-xs text-muted-foreground text-center sm:text-left">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 pt-4 border-t border-border/50">
+              <span className="text-[13px] text-muted-foreground text-center sm:text-left">
                 แสดง {startIndex + 1} ถึง {Math.min(endIndex, transactions.length)} จากทั้งหมด {transactions.length} รายการ
               </span>
               <div className="flex items-center justify-center gap-1">
                 {/* ChevronsLeft */}
-                <Button
-                  variant="outline"
-                  size="icon"
-                  className="h-8 w-8"
+                <button
+                  className="h-8 w-8 inline-flex items-center justify-center rounded-lg border border-border text-foreground hover:bg-muted transition-colors disabled:opacity-40 disabled:pointer-events-none"
                   onClick={() => setCurrentPage(1)}
                   disabled={currentPage === 1}
                 >
                   <ChevronsLeft className="h-4 w-4" />
-                </Button>
+                </button>
                 {/* ChevronLeft */}
-                <Button
-                  variant="outline"
-                  size="icon"
-                  className="h-8 w-8"
+                <button
+                  className="h-8 w-8 inline-flex items-center justify-center rounded-lg border border-border text-foreground hover:bg-muted transition-colors disabled:opacity-40 disabled:pointer-events-none"
                   onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
                   disabled={currentPage === 1}
                 >
                   <ChevronLeft className="h-4 w-4" />
-                </Button>
+                </button>
 
                 {/* Page numbers */}
                 {getPageNumbers().map((pNum, idx) => {
@@ -286,37 +344,37 @@ export function TransactionTable({ transactions }: TransactionTableProps) {
                     );
                   }
                   return (
-                    <Button
+                    <button
                       key={pNum}
-                      variant={currentPage === pNum ? "default" : "outline"}
-                      className="h-8 w-8 text-xs font-semibold"
+                      className={cn(
+                        "h-8 w-8 inline-flex items-center justify-center rounded-lg text-xs font-semibold transition-colors",
+                        currentPage === pNum
+                          ? "bg-primary text-primary-foreground"
+                          : "border border-border text-foreground hover:bg-muted"
+                      )}
                       onClick={() => setCurrentPage(pNum)}
                     >
                       {pNum}
-                    </Button>
+                    </button>
                   );
                 })}
 
                 {/* ChevronRight */}
-                <Button
-                  variant="outline"
-                  size="icon"
-                  className="h-8 w-8"
+                <button
+                  className="h-8 w-8 inline-flex items-center justify-center rounded-lg border border-border text-foreground hover:bg-muted transition-colors disabled:opacity-40 disabled:pointer-events-none"
                   onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
                   disabled={currentPage === totalPages}
                 >
                   <ChevronRight className="h-4 w-4" />
-                </Button>
+                </button>
                 {/* ChevronsRight */}
-                <Button
-                  variant="outline"
-                  size="icon"
-                  className="h-8 w-8"
+                <button
+                  className="h-8 w-8 inline-flex items-center justify-center rounded-lg border border-border text-foreground hover:bg-muted transition-colors disabled:opacity-40 disabled:pointer-events-none"
                   onClick={() => setCurrentPage(totalPages)}
                   disabled={currentPage === totalPages}
                 >
                   <ChevronsRight className="h-4 w-4" />
-                </Button>
+                </button>
               </div>
             </div>
           )}

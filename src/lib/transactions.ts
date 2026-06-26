@@ -7,6 +7,9 @@ export interface CreateTransactionInput {
   description: string | null;
   transaction_at: string;
   category_id: string | null;
+  currency?: string;
+  exchange_rate?: number;
+  attachment_path?: string | null;
 }
 
 export interface UpdateTransactionInput {
@@ -16,6 +19,9 @@ export interface UpdateTransactionInput {
   description?: string | null;
   transaction_at?: string;
   category_id?: string | null;
+  currency?: string;
+  exchange_rate?: number;
+  attachment_path?: string | null;
 }
 
 export async function listTransactionsForMonth(selectedMonth: Date): Promise<Transaction[]> {
@@ -57,6 +63,9 @@ export async function createTransaction(
       description: input.description ?? null,
       transaction_at: input.transaction_at,
       category_id: input.category_id,
+      currency: input.currency ?? "THB",
+      exchange_rate: input.exchange_rate ?? 1.0,
+      attachment_path: input.attachment_path ?? null,
     })
     .select()
     .single();
@@ -80,6 +89,9 @@ export async function updateTransaction(
   if (input.description !== undefined) updates.description = input.description;
   if (input.transaction_at !== undefined) updates.transaction_at = input.transaction_at;
   if (input.category_id !== undefined) updates.category_id = input.category_id;
+  if (input.currency !== undefined) updates.currency = input.currency;
+  if (input.exchange_rate !== undefined) updates.exchange_rate = input.exchange_rate;
+  if (input.attachment_path !== undefined) updates.attachment_path = input.attachment_path;
   updates.updated_at = new Date().toISOString();
 
   const { data, error } = await supabase

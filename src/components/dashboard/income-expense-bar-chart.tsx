@@ -10,7 +10,6 @@ import {
   ResponsiveContainer,
   Legend,
 } from "recharts";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { formatTHB } from "@/lib/format";
 
 interface TrendPoint {
@@ -42,23 +41,27 @@ export function IncomeExpenseBarChart({ data }: IncomeExpenseBarChartProps) {
   }));
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle className="text-lg">รายรับ vs รายจ่าย</CardTitle>
-      </CardHeader>
-      <CardContent>
-        <ResponsiveContainer width="100%" height={300}>
-          <BarChart data={chartData}>
-            <CartesianGrid strokeDasharray="3 3" />
-            <XAxis dataKey="monthLabel" fontSize={12} />
-            <YAxis fontSize={12} tickFormatter={(v) => formatTHB(v)} />
-            <Tooltip formatter={(value) => formatTHB(value as number)} />
-            <Legend />
-            <Bar dataKey="income" name="รายรับ" fill="#22c55e" radius={[4, 4, 0, 0]} />
-            <Bar dataKey="expense" name="รายจ่าย" fill="#ef4444" radius={[4, 4, 0, 0]} />
-          </BarChart>
-        </ResponsiveContainer>
-      </CardContent>
-    </Card>
+    <div className="bg-card rounded-xl p-7">
+      <h3 className="font-display text-lg mb-4">รายรับ vs รายจ่าย</h3>
+      <ResponsiveContainer width="100%" height={300}>
+        <BarChart data={chartData}>
+          <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" strokeOpacity={0.5} />
+          <XAxis dataKey="monthLabel" fontSize={12} tick={{ fill: 'var(--muted-foreground)' }} />
+          <YAxis fontSize={12} tickFormatter={(v) => formatTHB(v)} tick={{ fill: 'var(--muted-foreground)' }} />
+          <Tooltip
+            formatter={(value) => formatTHB(value as number)}
+            contentStyle={{
+              borderRadius: '12px',
+              border: '1px solid var(--border)',
+              boxShadow: '0 4px 12px rgba(0,0,0,0.08)',
+              fontSize: '14px',
+            }}
+          />
+          <Legend />
+          <Bar dataKey="income" name="รายรับ" fill="#10b981" radius={[6, 6, 0, 0]} />
+          <Bar dataKey="expense" name="รายจ่าย" fill="#ef4444" radius={[6, 6, 0, 0]} />
+        </BarChart>
+      </ResponsiveContainer>
+    </div>
   );
 }

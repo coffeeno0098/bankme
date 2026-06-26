@@ -7,8 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Loader2, Wallet, Eye, EyeOff } from "lucide-react";
+import { Loader2, Eye, EyeOff } from "lucide-react";
 
 const REMEMBER_EMAIL_KEY = "bankme_remember_email";
 
@@ -25,6 +24,7 @@ export function LoginForm({ onSwitchToSignup }: { onSwitchToSignup?: () => void 
   useEffect(() => {
     const saved = localStorage.getItem(REMEMBER_EMAIL_KEY);
     if (saved) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setEmail(saved);
       setRemember(true);
     }
@@ -62,18 +62,24 @@ export function LoginForm({ onSwitchToSignup }: { onSwitchToSignup?: () => void 
   }
 
   return (
-    <Card className="w-full max-w-sm">
-      <CardHeader className="text-center">
-        <div className="mx-auto mb-2 flex h-12 w-12 items-center justify-center rounded-full bg-primary/10">
-          <Wallet className="h-6 w-6 text-primary" />
+    <div className="w-full max-w-sm animate-fade-in-up">
+      {/* Card container — Cal.com rounded-xl, surface-card */}
+      <div className="bg-card rounded-2xl p-8 space-y-7 shadow-card">
+        {/* Logo — Manrope display */}
+        <div className="text-center space-y-2">
+          <h1 className="font-display text-[28px] font-bold tracking-tight text-foreground leading-tight">
+            <span className="text-muted-foreground font-semibold">฿</span>ank
+            <span className="text-foreground">Me</span>
+          </h1>
+          <p className="text-sm text-muted-foreground">
+            เข้าสู่ระบบเพื่อจัดการรายรับรายจ่าย
+          </p>
         </div>
-        <CardTitle className="text-2xl">BankMe</CardTitle>
-        <CardDescription>เข้าสู่ระบบเพื่อจัดการรายรับรายจ่ายของคุณ</CardDescription>
-      </CardHeader>
-      <CardContent>
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div className="space-y-2">
-            <Label htmlFor="email">อีเมล</Label>
+
+        {/* Form */}
+        <form onSubmit={handleSubmit} className="space-y-5">
+          <div className="space-y-1.5">
+            <Label htmlFor="email" className="text-sm font-medium text-foreground">อีเมล</Label>
             <Input
               id="email"
               type="email"
@@ -82,11 +88,12 @@ export function LoginForm({ onSwitchToSignup }: { onSwitchToSignup?: () => void 
               onChange={(e) => setEmail(e.target.value)}
               required
               autoComplete="email"
+              className="h-10 rounded-lg bg-background border-border"
             />
           </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="password">รหัสผ่าน</Label>
+          <div className="space-y-1.5">
+            <Label htmlFor="password" className="text-sm font-medium text-foreground">รหัสผ่าน</Label>
             <div className="relative">
               <Input
                 id="password"
@@ -97,12 +104,12 @@ export function LoginForm({ onSwitchToSignup }: { onSwitchToSignup?: () => void 
                 required
                 minLength={6}
                 autoComplete="current-password"
-                className="pr-10"
+                className="pr-10 h-10 rounded-lg bg-background border-border"
               />
               <button
                 type="button"
                 onClick={() => setShowPassword(!showPassword)}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
                 tabIndex={-1}
               >
                 {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
@@ -116,12 +123,12 @@ export function LoginForm({ onSwitchToSignup }: { onSwitchToSignup?: () => void 
               checked={remember}
               onCheckedChange={(v) => setRemember(!!v)}
             />
-            <Label htmlFor="remember" className="text-sm font-normal cursor-pointer">
-              จดจำฉันไว้ (ไม่ต้องกรอกใหม่ครั้งหน้า)
+            <Label htmlFor="remember" className="text-sm font-normal cursor-pointer text-muted-foreground">
+              จดจำฉันไว้
             </Label>
           </div>
 
-          <Button type="submit" className="w-full" disabled={loading}>
+          <Button type="submit" className="w-full h-10 rounded-lg font-semibold text-sm" disabled={loading}>
             {loading ? (
               <>
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
@@ -135,7 +142,7 @@ export function LoginForm({ onSwitchToSignup }: { onSwitchToSignup?: () => void 
           {message && (
             <p
               className={`text-center text-sm ${
-                message.type === "success" ? "text-green-600" : "text-red-600"
+                message.type === "success" ? "text-income" : "text-expense"
               }`}
             >
               {message.text}
@@ -144,18 +151,18 @@ export function LoginForm({ onSwitchToSignup }: { onSwitchToSignup?: () => void 
         </form>
 
         {onSwitchToSignup && (
-          <p className="mt-4 text-center text-sm text-muted-foreground">
+          <p className="text-center text-sm text-muted-foreground">
             ยังไม่มีบัญชี?{" "}
             <button
               type="button"
               onClick={onSwitchToSignup}
-              className="font-medium text-primary hover:underline"
+              className="font-semibold text-foreground hover:underline"
             >
               สมัครสมาชิก
             </button>
           </p>
         )}
-      </CardContent>
-    </Card>
+      </div>
+    </div>
   );
 }

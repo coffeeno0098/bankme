@@ -70,10 +70,10 @@ export function CategoryTable({ categories }: CategoryTableProps) {
   }
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-5">
       <div className="flex items-center justify-between">
-        <h2 className="text-lg font-semibold">หมวดหมู่รายจ่าย</h2>
-        <Button size="sm" onClick={() => setAdding(true)} disabled={adding}>
+        <h2 className="font-display text-lg">หมวดหมู่รายจ่าย</h2>
+        <Button size="sm" onClick={() => setAdding(true)} disabled={adding} className="rounded-lg h-9 text-sm font-semibold">
           <PlusCircle className="mr-2 h-4 w-4" />
           เพิ่มหมวดหมู่
         </Button>
@@ -85,17 +85,19 @@ export function CategoryTable({ categories }: CategoryTableProps) {
           <div className="flex-1">
             <Input
               placeholder="ชื่อหมวดหมู่ใหม่"
+              className="h-10 rounded-lg"
               {...register("name")}
             />
             {errors.name && (
               <p className="mt-1 text-sm text-red-500">{errors.name.message}</p>
             )}
           </div>
-          <Button type="submit" size="sm">เพิ่ม</Button>
+          <Button type="submit" size="sm" className="rounded-lg h-10">เพิ่ม</Button>
           <Button
             type="button"
             variant="ghost"
             size="sm"
+            className="rounded-lg h-10"
             onClick={() => {
               setAdding(false);
               reset();
@@ -106,31 +108,31 @@ export function CategoryTable({ categories }: CategoryTableProps) {
         </form>
       )}
 
-      {/* Table */}
-      <div className="rounded-md border">
+      {/* Table — Cal.com card-style */}
+      <div className="rounded-xl border border-border/60 overflow-hidden shadow-card">
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>ชื่อหมวดหมู่</TableHead>
-              <TableHead className="w-[120px] text-right">จัดการ</TableHead>
+              <TableHead className="font-medium text-[13px]">ชื่อหมวดหมู่</TableHead>
+              <TableHead className="w-[120px] text-right font-medium text-[13px]">จัดการ</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {categories.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={2} className="text-center text-muted-foreground py-6">
+                <TableCell colSpan={2} className="text-center text-muted-foreground py-8 text-sm">
                   ยังไม่มีหมวดหมู่ — เพิ่มหมวดหมู่แรกของคุณ!
                 </TableCell>
               </TableRow>
             ) : (
               categories.map((cat) => (
                 <TableRow key={cat.id}>
-                  <TableCell>
+                  <TableCell className="text-sm font-medium text-foreground">
                     {editingId === cat.id ? (
                       <Input
                         value={editValue}
                         onChange={(e) => setEditValue(e.target.value)}
-                        className="max-w-[300px]"
+                        className="max-w-[300px] h-9 rounded-lg"
                         autoFocus
                         onKeyDown={(e) => {
                           if (e.key === "Enter") handleRename(cat.id);
@@ -145,40 +147,36 @@ export function CategoryTable({ categories }: CategoryTableProps) {
                     <div className="flex justify-end gap-1">
                       {editingId === cat.id ? (
                         <>
-                          <Button
-                            size="icon"
-                            variant="ghost"
+                          <button
+                            className="h-8 w-8 inline-flex items-center justify-center rounded-lg hover:bg-muted transition-colors text-emerald-600"
                             onClick={() => handleRename(cat.id)}
                           >
-                            <Check className="h-4 w-4 text-green-600" />
-                          </Button>
-                          <Button
-                            size="icon"
-                            variant="ghost"
+                            <Check className="h-4 w-4" />
+                          </button>
+                          <button
+                            className="h-8 w-8 inline-flex items-center justify-center rounded-lg hover:bg-muted transition-colors text-muted-foreground"
                             onClick={() => setEditingId(null)}
                           >
                             <X className="h-4 w-4" />
-                          </Button>
+                          </button>
                         </>
                       ) : (
                         <>
-                          <Button
-                            size="icon"
-                            variant="ghost"
+                          <button
+                            className="h-8 w-8 inline-flex items-center justify-center rounded-lg hover:bg-muted transition-colors text-muted-foreground"
                             onClick={() => {
                               setEditingId(cat.id);
                               setEditValue(cat.name);
                             }}
                           >
                             <Pencil className="h-4 w-4" />
-                          </Button>
-                          <Button
-                            size="icon"
-                            variant="ghost"
+                          </button>
+                          <button
+                            className="h-8 w-8 inline-flex items-center justify-center rounded-lg hover:bg-muted transition-colors text-red-500"
                             onClick={() => handleDelete(cat.id, cat.name)}
                           >
-                            <Trash2 className="h-4 w-4 text-red-500" />
-                          </Button>
+                            <Trash2 className="h-4 w-4" />
+                          </button>
                         </>
                       )}
                     </div>

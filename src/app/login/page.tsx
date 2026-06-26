@@ -8,7 +8,7 @@ export default function LoginPage() {
   const [tab, setTab] = useState<"login" | "signup">("login");
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-muted/30 p-4">
+    <div className="flex min-h-screen items-center justify-center bg-background p-4">
       {tab === "login" ? (
         <LoginForm onSwitchToSignup={() => setTab("signup")} />
       ) : (

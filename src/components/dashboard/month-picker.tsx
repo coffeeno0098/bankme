@@ -1,8 +1,7 @@
 "use client";
 
-import { Button } from "@/components/ui/button";
 import { ChevronLeft, ChevronRight } from "lucide-react";
-import { formatMonthLabel, shiftMonth } from "@/lib/month";
+import { shiftMonth } from "@/lib/month";
 
 const monthNames = [
   "มกราคม", "กุมภาพันธ์", "มีนาคม", "เมษายน", "พฤษภาคม", "มิถุนายน",
@@ -20,24 +19,23 @@ export function MonthPicker({ selectedMonth, onChange }: MonthPickerProps) {
   } ${selectedMonth.getFullYear() + 543}`;
 
   return (
-    <div className="flex items-center gap-2">
-      <Button
-        variant="outline"
-        size="icon"
+    <div className="flex items-center gap-3">
+      {/* Button-icon-circular — 36px, Cal.com spec */}
+      <button
+        className="flex h-9 w-9 items-center justify-center rounded-full border border-border bg-background text-foreground hover:bg-muted transition-colors duration-150 cursor-pointer"
         onClick={() => onChange(shiftMonth(selectedMonth, -1))}
       >
         <ChevronLeft className="h-4 w-4" />
-      </Button>
-      <span className="min-w-[180px] text-center font-semibold text-lg">
+      </button>
+      <span className="min-w-[200px] text-center font-display text-[22px] leading-tight">
         {displayLabel}
       </span>
-      <Button
-        variant="outline"
-        size="icon"
+      <button
+        className="flex h-9 w-9 items-center justify-center rounded-full border border-border bg-background text-foreground hover:bg-muted transition-colors duration-150 cursor-pointer"
         onClick={() => onChange(shiftMonth(selectedMonth, 1))}
       >
         <ChevronRight className="h-4 w-4" />
-      </Button>
+      </button>
     </div>
   );
 }

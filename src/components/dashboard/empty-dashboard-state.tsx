@@ -1,4 +1,3 @@
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { PlusCircle } from "lucide-react";
 
@@ -8,19 +7,17 @@ interface EmptyDashboardStateProps {
 
 export function EmptyDashboardState({ onAddTransaction }: EmptyDashboardStateProps) {
   return (
-    <Card className="border-dashed">
-      <CardHeader>
-        <CardTitle className="text-center">ยังไม่มีรายการ</CardTitle>
-      </CardHeader>
-      <CardContent className="flex flex-col items-center gap-4 py-8">
-        <p className="text-center text-muted-foreground">
+    <div className="bg-card rounded-xl p-12 text-center space-y-5">
+      <div className="space-y-2">
+        <h2 className="font-display text-display-sm">ยังไม่มีรายการ</h2>
+        <p className="text-muted-foreground text-sm max-w-sm mx-auto">
           เริ่มเพิ่มรายรับหรือรายจ่ายแรกของคุณเลย!
         </p>
-        <Button onClick={onAddTransaction} size="lg">
-          <PlusCircle className="mr-2 h-5 w-5" />
-          เพิ่มรายการแรก
-        </Button>
-      </CardContent>
-    </Card>
+      </div>
+      <Button onClick={onAddTransaction} size="lg" className="rounded-lg h-11 px-6 font-semibold text-sm">
+        <PlusCircle className="mr-2 h-4 w-4" />
+        เพิ่มรายการแรก
+      </Button>
+    </div>
   );
 }
