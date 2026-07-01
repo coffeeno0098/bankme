@@ -11,15 +11,16 @@ export function calculateMonthlySummary(
   transactions: FinanceTransaction[],
   selectedMonth: Date
 ): MonthlySummary {
-  const year = selectedMonth.getFullYear();
-  const month = selectedMonth.getMonth();
+  const year = selectedMonth.getUTCFullYear();
+  const month = selectedMonth.getUTCMonth();
 
   let totalIncome = 0;
   let totalExpense = 0;
 
   for (const tx of transactions) {
     const txDate = new Date(tx.transaction_at);
-    if (txDate.getFullYear() !== year || txDate.getMonth() !== month) {
+    const txBkk = new Date(txDate.getTime() + 7 * 60 * 60 * 1000);
+    if (txBkk.getUTCFullYear() !== year || txBkk.getUTCMonth() !== month) {
       continue;
     }
     if (tx.type === "income") {
@@ -61,8 +62,8 @@ export function buildIncomeExpenseTrend(
   referenceDate: Date,
   months: number
 ): TrendPoint[] {
-  const refYear = referenceDate.getFullYear();
-  const refMonth = referenceDate.getMonth();
+  const refYear = referenceDate.getUTCFullYear();
+  const refMonth = referenceDate.getUTCMonth();
 
   // Build last N months starting from (refMonth - months + 1)
   const startMonth = refMonth - months + 1;
@@ -83,7 +84,8 @@ export function buildIncomeExpenseTrend(
   // Fill in actual data
   for (const tx of transactions) {
     const txDate = new Date(tx.transaction_at);
-    const label = `${txDate.getFullYear()}-${String(txDate.getMonth() + 1).padStart(2, "0")}`;
+    const txBkk = new Date(txDate.getTime() + 7 * 60 * 60 * 1000);
+    const label = `${txBkk.getUTCFullYear()}-${String(txBkk.getUTCMonth() + 1).padStart(2, "0")}`;
     const point = result.find((r) => r.monthLabel === label);
     if (!point) continue;
 

@@ -114,9 +114,19 @@ const getTransactionStyle = (
 };
 
 function formatDateHeader(dateStr: string) {
-  const date = new Date(dateStr);
-  if (isToday(date)) return "วันนี้";
-  if (isYesterday(date)) return "เมื่อวาน";
+  const [year, month, day] = dateStr.split("-").map(Number);
+  const date = new Date(year, month - 1, day);
+  
+  const now = new Date();
+  const bkkNow = new Date(now.getTime() + 7 * 60 * 60 * 1000);
+  const todayStr = `${bkkNow.getUTCFullYear()}-${String(bkkNow.getUTCMonth() + 1).padStart(2, "0")}-${String(bkkNow.getUTCDate()).padStart(2, "0")}`;
+  
+  const yesterday = new Date(now.getTime() - 24 * 60 * 60 * 1000);
+  const bkkYesterday = new Date(yesterday.getTime() + 7 * 60 * 60 * 1000);
+  const yesterdayStr = `${bkkYesterday.getUTCFullYear()}-${String(bkkYesterday.getUTCMonth() + 1).padStart(2, "0")}-${String(bkkYesterday.getUTCDate()).padStart(2, "0")}`;
+  
+  if (dateStr === todayStr) return "วันนี้";
+  if (dateStr === yesterdayStr) return "เมื่อวาน";
   return format(date, "EEEEที่ d MMMM yyyy", { locale: th });
 }
 
@@ -142,9 +152,10 @@ export function TransactionTable({ transactions, onEdit, onDelete }: Transaction
   const endIndex = startIndex + itemsPerPage;
   const paginatedTransactions = transactions.slice(startIndex, endIndex);
 
-  // Group paginated transactions by date
+  // Group paginated transactions by date in UTC+7
   const grouped = paginatedTransactions.reduce<Record<string, TransactionRow[]>>((acc, tx) => {
-    const dateKey = tx.transaction_at.split("T")[0];
+    const dateBkk = new Date(new Date(tx.transaction_at).getTime() + 7 * 60 * 60 * 1000);
+    const dateKey = `${dateBkk.getUTCFullYear()}-${String(dateBkk.getUTCMonth() + 1).padStart(2, "0")}-${String(dateBkk.getUTCDate()).padStart(2, "0")}`;
     if (!acc[dateKey]) acc[dateKey] = [];
     acc[dateKey].push(tx);
     return acc;
@@ -262,7 +273,12 @@ export function TransactionTable({ transactions, onEdit, onDelete }: Transaction
                       <div className="flex items-center gap-2 sm:gap-4 shrink-0">
                         <div className="flex items-center gap-3 text-right">
                           <div className="hidden sm:block text-[11px] text-muted-foreground font-medium">
-                            {format(new Date(tx.transaction_at), "HH:mm")}
+                            {(() => {
+                              const txBkk = new Date(new Date(tx.transaction_at).getTime() + 7 * 60 * 60 * 1000);
+                              const hours = String(txBkk.getUTCHours()).padStart(2, "0");
+                              const minutes = String(txBkk.getUTCMinutes()).padStart(2, "0");
+                              return `${hours}:${minutes}`;
+                            })()}
                           </div>
                           <div
                             className={cn(

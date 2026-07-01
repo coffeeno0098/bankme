@@ -44,6 +44,19 @@ type TransactionFormValues = Omit<TransactionInput, "currency" | "exchange_rate"
   attachment_path?: string | null;
 };
 
+function toBkkISOString(date: Date): string {
+  const bkkDate = new Date(date.getTime() + 7 * 60 * 60 * 1000);
+  return bkkDate.toISOString().slice(0, 16);
+}
+
+function parseBkkDateTime(dateTimeStr: string): string {
+  const [datePart, timePart] = dateTimeStr.split("T");
+  const [year, month, day] = datePart.split("-").map(Number);
+  const [hours, minutes] = timePart.split(":").map(Number);
+  const utcMs = Date.UTC(year, month - 1, day, hours, minutes, 0);
+  return new Date(utcMs - 7 * 60 * 60 * 1000).toISOString();
+}
+
 interface TransactionDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
@@ -83,7 +96,7 @@ export function TransactionDialog({
     defaultValues: {
       type: "expense",
       amount: 0,
-      transaction_at: new Date().toISOString().slice(0, 16),
+      transaction_at: toBkkISOString(new Date()),
       description: "",
       category_id: null,
       currency: "THB",
@@ -101,9 +114,7 @@ export function TransactionDialog({
         reset({
           type: transaction.type,
           amount: transaction.amount,
-          transaction_at: new Date(transaction.transaction_at)
-            .toISOString()
-            .slice(0, 16),
+          transaction_at: toBkkISOString(new Date(transaction.transaction_at)),
           description: transaction.description || "",
           category_id: transaction.category_id,
           currency: transaction.currency || "THB",
@@ -114,7 +125,7 @@ export function TransactionDialog({
         reset({
           type: "expense",
           amount: 0,
-          transaction_at: new Date().toISOString().slice(0, 16),
+          transaction_at: toBkkISOString(new Date()),
           description: "",
           category_id: null,
           currency: "THB",
@@ -163,7 +174,7 @@ export function TransactionDialog({
           type: data.type,
           amount: data.amount,
           description: data.description || null,
-          transaction_at: new Date(data.transaction_at).toISOString(),
+          transaction_at: parseBkkDateTime(data.transaction_at),
           category_id: data.type === "expense" ? data.category_id : null,
           currency: data.currency,
           exchange_rate: data.exchange_rate,
@@ -178,7 +189,7 @@ export function TransactionDialog({
           type: data.type,
           amount: data.amount,
           description: data.description || null,
-          transaction_at: new Date(data.transaction_at).toISOString(),
+          transaction_at: parseBkkDateTime(data.transaction_at),
           category_id: data.type === "expense" ? data.category_id : null,
           currency: data.currency,
           exchange_rate: data.exchange_rate,

@@ -53,9 +53,12 @@ export function DashboardFilters({
   // Generate options from 3 months ahead to 12 months back
   const getMonthOptions = () => {
     const options = [];
-    const today = new Date();
+    const now = new Date();
+    const todayBkk = new Date(now.getTime() + 7 * 60 * 60 * 1000);
+    const year = todayBkk.getUTCFullYear();
+    const month = todayBkk.getUTCMonth();
     for (let i = -3; i <= 12; i++) {
-      const d = new Date(today.getFullYear(), today.getMonth() - i, 1);
+      const d = new Date(Date.UTC(year, month - i, 1, 0, 0, 0));
       options.push(d);
     }
     return options;
@@ -121,7 +124,7 @@ export function DashboardFilters({
             <SelectContent>
               {getMonthOptions().map((m) => {
                 const value = formatMonthLabel(m);
-                const label = `${monthNames[m.getMonth()]} ${m.getFullYear() + 543}`;
+                const label = `${monthNames[m.getUTCMonth()]} ${m.getUTCFullYear() + 543}`;
                 return (
                   <SelectItem key={value} value={value}>
                     {label}

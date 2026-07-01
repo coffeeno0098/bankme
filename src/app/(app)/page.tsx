@@ -21,9 +21,15 @@ export default async function DashboardPage({
   const params = await searchParams;
 
   // Parse selected month from URL or default to current
-  const selectedMonth = params.month
-    ? new Date(params.month + "-01")
-    : new Date();
+  let selectedMonth: Date;
+  if (params.month) {
+    const [year, month] = params.month.split("-").map(Number);
+    selectedMonth = new Date(Date.UTC(year, month - 1, 1, 0, 0, 0));
+  } else {
+    const now = new Date();
+    const bkkTime = new Date(now.getTime() + 7 * 60 * 60 * 1000);
+    selectedMonth = new Date(Date.UTC(bkkTime.getUTCFullYear(), bkkTime.getUTCMonth(), 1, 0, 0, 0));
+  }
 
   // Parse filters
   const typeFilter = (params.type as "all" | "income" | "expense") || "all";
@@ -89,11 +95,14 @@ export default async function DashboardPage({
   const pieData = groupExpensesByCategory(summaryTransactions);
 
   // Bar chart data (last 6 months)
+  const trendStart = new Date(Date.UTC(selectedMonth.getUTCFullYear(), selectedMonth.getUTCMonth() - 5, 1, 0, 0, 0) - 7 * 60 * 60 * 1000);
+  const trendEnd = new Date(Date.UTC(selectedMonth.getUTCFullYear(), selectedMonth.getUTCMonth() + 1, 1, 0, 0, 0) - 7 * 60 * 60 * 1000);
+
   const { data: trendTx } = await supabase
     .from("transactions")
     .select("type, amount, transaction_at, categories(name)")
-    .gte("transaction_at", new Date(selectedMonth.getFullYear(), selectedMonth.getMonth() - 5, 1).toISOString())
-    .lt("transaction_at", new Date(selectedMonth.getFullYear(), selectedMonth.getMonth() + 1, 1).toISOString())
+    .gte("transaction_at", trendStart.toISOString())
+    .lt("transaction_at", trendEnd.toISOString())
     .order("transaction_at", { ascending: true });
 
   const trendData = buildIncomeExpenseTrend(
