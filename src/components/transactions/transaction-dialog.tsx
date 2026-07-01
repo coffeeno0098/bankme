@@ -49,8 +49,11 @@ function toBkkISOString(date: Date): string {
   return bkkDate.toISOString().slice(0, 16);
 }
 
-function parseBkkDateTime(dateTimeStr: string): string {
-  const [datePart, timePart] = dateTimeStr.split("T");
+function parseBkkDateTime(dateTime: string | Date): string {
+  if (dateTime instanceof Date) {
+    return dateTime.toISOString();
+  }
+  const [datePart, timePart] = dateTime.split("T");
   const [year, month, day] = datePart.split("-").map(Number);
   const [hours, minutes] = timePart.split(":").map(Number);
   const utcMs = Date.UTC(year, month - 1, day, hours, minutes, 0);
